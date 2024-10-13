@@ -1,12 +1,6 @@
 import { pinata } from "@/utils/config";
 import { NextRequest, NextResponse } from "next/server";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 const errors = {
   internalServerError: () =>
     NextResponse.json({ error: "Internal Server Error" }, { status: 500 }),
