@@ -5,9 +5,19 @@ import { FileListItem } from "pinata";
 import React, { useState } from "react";
 import CircularLoader from "../loader/circular";
 
-type listType = { files: FileListItem[]; revalidate: () => void };
+type listType = {
+  files: FileListItem[];
+  revalidate: () => void;
+  nextPageToken: string | null;
+  paginateFiles: () => void;
+};
 
-export default function List({ files, revalidate }: listType) {
+export default function List({
+  files,
+  revalidate,
+  nextPageToken,
+  paginateFiles,
+}: listType) {
   const [message, setMessage] = useState("");
   const [isLoading, setLoading] = useState(false);
 
@@ -92,7 +102,7 @@ export default function List({ files, revalidate }: listType) {
                 </th>
                 <th>
                   <button
-                    className="text-green-200"
+                    className="text-green-200 hover:text-green-400"
                     title="Click to copy the URL"
                     onClick={() => handleUrl(cid)}
                   >
@@ -104,6 +114,11 @@ export default function List({ files, revalidate }: listType) {
           })}
         </tbody>
       </table>
+      {nextPageToken && (
+        <div className="py-4 justify-end flex text-xl font-black">
+          <button onClick={paginateFiles}>NEXT</button>
+        </div>
+      )}
     </section>
   );
 }

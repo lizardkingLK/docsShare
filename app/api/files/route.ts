@@ -16,16 +16,22 @@ const errors = {
 export async function GET(request: NextRequest) {
   try {
     const groupId = request.nextUrl.searchParams.get("groupId");
+    const nextPageToken = request.nextUrl.searchParams.get("nextPageToken");
     if (!groupId) {
       return errors.invalidParams();
     }
 
-    const files = await pinata.files.public.list().group(groupId);
+    const files = nextPageToken
+      ? await pinata.files.public.list().group(groupId).pageToken(nextPageToken)
+      : await pinata.files.public.list().group(groupId);
     if (!files) {
       return errors.internalServerError();
     }
 
-    return NextResponse.json({ data: files.files }, { status: 200 });
+    return NextResponse.json(
+      { data: { files: files.files, nextPageToken: files.next_page_token } },
+      { status: 200 }
+    );
   } catch (error) {
     console.log(error);
     return errors.notFound();
