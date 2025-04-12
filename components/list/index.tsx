@@ -43,14 +43,14 @@ export default function List({ files, revalidate }: listType) {
           {isLoading ? (
             <CircularLoader />
           ) : (
-            <button onClick={() => revalidate()}>
+            <button onClick={() => revalidate()} title="Click to Refresh">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="size-6"
+                className="size-6 hover:animate-spin"
               >
                 <path
                   strokeLinecap="round"
@@ -91,7 +91,13 @@ export default function List({ files, revalidate }: listType) {
                     .replace(",", "")}
                 </th>
                 <th>
-                  <button onClick={() => handleUrl(cid)}>COPY</button>
+                  <button
+                    className="text-green-200"
+                    title="Click to copy the URL"
+                    onClick={() => handleUrl(cid)}
+                  >
+                    COPY
+                  </button>
                 </th>
               </tr>
             );

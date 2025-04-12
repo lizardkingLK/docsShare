@@ -24,18 +24,11 @@ export default function Upload({ id }: groupType) {
 
     try {
       setUploading(true);
-      const keyRequest = await fetch("/api/key");
-      const keyData = await keyRequest.json();
-      const upload = await pinata.upload.file(file).key(keyData.JWT).group(id);
-      const urlReuest = await fetch("/api/sign", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cid: upload.cid }),
-      });
-      const url = await urlReuest.json();
-      setUrl(url);
+      const urlRequest = await fetch(`/api/urls?groupId=${id}`);
+      const urlResponse = await urlRequest.json();
+      const upload = await pinata.upload.public.file(file).url(urlResponse.url);
+      const fileUrl = await pinata.gateways.public.convert(upload.cid);
+      setUrl(fileUrl);
       setUploading(false);
     } catch (e) {
       console.log(e);
@@ -52,6 +45,11 @@ export default function Upload({ id }: groupType) {
     );
   }
 
+  const handleReset = () => {
+    setFile(undefined);
+    setUrl("");
+  };
+
   return (
     <div className={commonSectionStyle}>
       <nav className="font-bold text-4xl flex justify-between items-center w-full px-4">
@@ -60,21 +58,32 @@ export default function Upload({ id }: groupType) {
         </div>
         <UserButton />
       </nav>
-      <DropZone setFile={setFile} />
-      {!url && file && (
-        <button
-          disabled={uploading}
-          onClick={uploadFile}
-          className="w-full bg-green-200 text-black text-2xl"
-        >
-          {uploading ? <CircularLoader /> : "Upload"}
-        </button>
-      )}
-      {url && (
-        <Link href={url} target="_blank">
-          <p className="text-center text-2xl font-black">DOWNLOAD</p>
-        </Link>
-      )}
+      <DropZone setFile={setFile} file={file} />
+      <div className="flex gap-4">
+        {!url && file && (
+          <button
+            disabled={uploading}
+            onClick={uploadFile}
+            className="w-full bg-green-200 text-black font-black text-2xl"
+            title="Click to Upload"
+          >
+            {uploading ? <CircularLoader /> : "Upload"}
+          </button>
+        )}
+        {url && (
+          <Link href={url} target="_blank">
+            <p className="text-center text-2xl font-black" title="Click to Download">DOWNLOAD</p>
+          </Link>
+        )}
+        {file && (
+          <button
+            className="text-center text-2xl text-red-500"
+            onClick={handleReset}
+            title="Click to Change File">
+            Reset
+          </button>
+        )}
+      </div>
     </div>
   );
 }

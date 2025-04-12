@@ -3,9 +3,13 @@ import { useDropzone } from "react-dropzone";
 
 type Props = {
   setFile: (file: File) => void;
+  file?: File;
 };
 
-export default function DropZone({ setFile }: Props) {
+const className =
+  "flex flex-col items-center justify-center cursor-pointer h-[calc(20vh)] space-y-4 bg-black text-green-200 w-full place-items-center";
+
+export default function DropZone({ setFile, file }: Props) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setFile(acceptedFiles[0]);
@@ -17,11 +21,12 @@ export default function DropZone({ setFile }: Props) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  if (file) {
+    return <div className={className}>Selected file: {file.name}</div>;
+  }
+
   return (
-    <div
-      {...getRootProps()}
-      className="flex flex-col items-center justify-center cursor-pointer h-[calc(20vh)] space-y-4 bg-black text-green-200 w-full place-items-center"
-    >
+    <div {...getRootProps()} className={className}>
       <input {...getInputProps()} />
       {isDragActive ? (
         <p>Drop the file here ...</p>

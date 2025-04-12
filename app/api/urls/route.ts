@@ -1,6 +1,8 @@
 import { pinata } from "@/utils/config";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const errors = {
   internalServerError: () =>
     NextResponse.json({ error: "Internal Server Error" }, { status: 500 }),
@@ -11,6 +13,28 @@ const errors = {
     ),
 };
 
+export async function GET(request: NextRequest) {
+  const groupId = request.nextUrl.searchParams.get("groupId");
+  if (!groupId) {
+    return errors.invalidParams();
+  }
+  
+  try {
+    const url = await pinata.upload.public.createSignedURL({
+      groupId,
+      expires: 3600,
+    });
+
+    return NextResponse.json({ url }, { status: 200 }); // Returns the signed upload URL
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { text: "Error creating API Key:" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { cid } = await request.json();
@@ -18,7 +42,7 @@ export async function POST(request: NextRequest) {
       return errors.invalidParams();
     }
 
-    const url = await pinata.gateways.createSignedURL({
+    const url = await pinata.gateways.private.createAccessLink({
       cid,
       expires: 3600,
     });

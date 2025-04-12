@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return errors.invalidParams();
     }
 
-    const files = await pinata.files.list().group(groupId);
+    const files = await pinata.files.public.list().group(groupId);
     if (!files) {
       return errors.internalServerError();
     }
@@ -36,12 +36,15 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.formData();
     const file: File | null = data.get("file") as unknown as File;
-    const uploadData = await pinata.upload.file(file);
-    const url = await pinata.gateways.createSignedURL({
-      cid: uploadData.cid,
+    const signedURL = await pinata.upload.public.createSignedURL({
       expires: 3600,
     });
-    return NextResponse.json(url, { status: 200 });
+    const response = await pinata.upload.public.file(file).url(signedURL);
+    if (!response?.id) {
+      return errors.internalServerError();
+    }
+
+    return NextResponse.json(signedURL, { status: 200 });
   } catch (e) {
     console.log(e);
     return errors.internalServerError();

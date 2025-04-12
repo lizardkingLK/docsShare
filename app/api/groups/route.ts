@@ -18,10 +18,13 @@ export async function POST() {
     return errors.invalidParams();
   }
 
-  const { groups } = await pinata.groups.list();
+  const { groups } = await pinata.groups.public.list();
   let userGroup = groups.find((g) => g.name === id);
   if (!userGroup) {
-    userGroup = await pinata.groups.create({ name: id, isPublic: false });
+    userGroup = await pinata.groups.public.create({
+      name: id,
+      isPublic: false,
+    });
   }
 
   return NextResponse.json({ data: userGroup }, { status: 200 });
