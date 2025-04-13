@@ -72,14 +72,20 @@ export default function Upload({ id }: groupType) {
         )}
         {url && (
           <Link href={url} target="_blank">
-            <p className="text-center text-2xl font-black" title="Click to Download">DOWNLOAD</p>
+            <p
+              className="text-center text-2xl font-black"
+              title="Click to Download"
+            >
+              DOWNLOAD
+            </p>
           </Link>
         )}
         {file && (
           <button
             className="text-center text-2xl text-red-500"
             onClick={handleReset}
-            title="Click to Change File">
+            title="Click to Change File"
+          >
             Reset
           </button>
         )}

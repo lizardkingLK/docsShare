@@ -1,21 +1,27 @@
 "use client";
 
-import { commonSectionStyle } from "@/constants";
 import { FileListItem } from "pinata";
 import React, { useState } from "react";
 import CircularLoader from "../loader/circular";
+import ChevronLeft from "./ChevronLeft";
+import ChevronRight from "./ChevronRight";
+import RefreshIcon from "./RefreshIcon";
 
 type listType = {
   files: FileListItem[];
   revalidate: () => void;
+  pageIndex: number;
   nextPageToken: string | null;
-  paginateFiles: () => void;
+  isListLoading: boolean;
+  paginateFiles: (pageIndex: number) => void;
 };
 
 export default function List({
   files,
   revalidate,
+  pageIndex,
   nextPageToken,
+  isListLoading,
   paginateFiles,
 }: listType) {
   const [message, setMessage] = useState("");
@@ -36,14 +42,6 @@ export default function List({
       });
   };
 
-  if (!files) {
-    return (
-      <div className={commonSectionStyle}>
-        <CircularLoader />
-      </div>
-    );
-  }
-
   return (
     <section className="text-green-200 bg-black h-[calc(100vh)] w-full p-4">
       <div className="flex justify-between items-center pb-4">
@@ -54,20 +52,7 @@ export default function List({
             <CircularLoader />
           ) : (
             <button onClick={() => revalidate()} title="Click to Refresh">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6 hover:animate-spin"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                />
-              </svg>
+              <RefreshIcon />
             </button>
           )}
         </div>
@@ -88,8 +73,13 @@ export default function List({
             const { id, mime_type, name, size, created_at, cid } = file;
 
             return (
-              <tr key={id} className="border-y-2 border-green-200">
-                <th className="py-4">{1 + index}</th>
+              <tr
+                key={id}
+                className={`border-y-2 border-green-200 ${
+                  isListLoading ? "blur-sm" : ""
+                }`}
+              >
+                <th className="py-4">{pageIndex * 10 + (1 + index)}</th>
                 <th className="text-right">{name}</th>
                 <th>{mime_type}</th>
                 <th>{Math.round(size / 1000)}</th>
@@ -115,8 +105,28 @@ export default function List({
         </tbody>
       </table>
       {nextPageToken && (
-        <div className="py-4 justify-end flex text-xl font-black">
-          <button onClick={paginateFiles}>NEXT</button>
+        <div className="py-4 justify-between flex text-xl font-black">
+          <div>
+            {pageIndex !== 0 && (
+              <button
+                onClick={() => paginateFiles(pageIndex - 1)}
+                title="Go to Previous Page"
+              >
+                <ChevronLeft />
+              </button>
+            )}
+          </div>
+          <p className="text-green-200">{pageIndex + 1}</p>
+          <div>
+            {files.length >= 10 && (
+              <button
+                onClick={() => paginateFiles(pageIndex + 1)}
+                title="Go to Next Page"
+              >
+                <ChevronRight />
+              </button>
+            )}
+          </div>
         </div>
       )}
     </section>
